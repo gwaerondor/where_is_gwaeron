@@ -1,0 +1,18 @@
+{application, whereisgwaeron,
+ [{description, "An OTP application"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {whereisgwaeron_app, []}},
+  {applications,
+   [kernel,
+    stdlib,
+    xmerl,
+    jiffy
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {maintainers, []},
+  {licenses, []},
+  {links, []}
+ ]}.
