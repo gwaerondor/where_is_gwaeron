@@ -83,4 +83,4 @@ nasty_utf8_workaround([X | R]) ->
     [X | nasty_utf8_workaround(R)].
 
 nasty_removal_of_copyright(String) ->
-    re:replace(String, "Data . OpenStreetMap", "", [{return, list}]).
+    re:replace(String, "Data . OpenStreetMap", "Data copyright OpenStreetMap", [{return, list}]).
