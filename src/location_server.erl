@@ -22,16 +22,22 @@ handle_cast(_, State) ->
     {noreply, State}.
 
 handle_info({tcp, _, Message}, State) ->
-    Coords = data_parser:parse_location_update(Message),
-    Json_location = query_coordinates(Coords),
-    Parsed = data_parser:parse_json(Json_location),
-    New_location = data_parser:pretty_location(Parsed),
-    io:format("Location has been updated from coords ~p~n"
-	      "New location: ~p~n", [Coords, New_location]),
-    {noreply, State#{coordinates := Coords,
-		     location := New_location}};
-handle_info(Something, State) ->
-    io:format("Got something else: ~p~n", [Something]),
+    case data_parser:parse_location_update(Message) of
+	{ok, Coords} ->
+	    case get_location_from_coordinates(Coords) of
+		{error, _} ->
+		    {noreply, State};
+		{ok, New_location} ->
+		    io:format("Location has been updated.~n"
+			      "Coordinates: ~p~n"
+			      "Cleartext location: ~p~n", [Coords, New_location]),
+		    {noreply, State#{coordinates := Coords,
+				     location := New_location}}
+	    end;
+	{error, bad_update} ->
+	    {noreply, State}
+    end;
+handle_info(_, State) ->
     {noreply, State}.
 
 code_change(_, State, _) ->
@@ -66,6 +72,16 @@ query_coordinates(Coords) ->
     Command = string:join(["bash lookup.bash", Lat, Lon], " "),
     clean_up(os:cmd(Command)).
 
+get_location_from_coordinates(Coords) ->
+    Json_location = query_coordinates(Coords),
+    Parsed = data_parser:parse_json(Json_location),
+    case maps:is_key(<<"error">>, Parsed) of
+	true ->
+	    {error, unable_to_geo_code};
+	false ->
+	    {ok, data_parser:pretty_location(Parsed)}
+    end.
+
 five_decimals(Float) ->
     lists:flatten(io_lib:format("~.5f", [Float])).
 
@@ -76,7 +92,7 @@ clean_up(Result) ->
 
 nasty_utf8_workaround([]) ->
     [];
-nasty_utf8_workaround([X | R]) when X > 255 ->
+nasty_utf8_workaround([X | R]) when X > 127 ->
     [$x | nasty_utf8_workaround(R)];
 nasty_utf8_workaround([X | R]) ->
     [X | nasty_utf8_workaround(R)].

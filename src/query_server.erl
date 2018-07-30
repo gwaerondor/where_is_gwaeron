@@ -15,7 +15,7 @@ start_link() ->
 
 init(_) ->
     start_request_listener(),
-    {ok, #{}}.
+    {ok, no_state}.
 
 handle_call(_, _, State) ->
     {reply, ok, State}.
@@ -24,11 +24,9 @@ handle_cast(_, State) ->
     {noreply, State}.
 
 handle_info({tcp, Socket, Message}, State) ->
-    io:format("Got TCP request: ~p~n", [Message]),
     respond(Socket),
     {noreply, State};
 handle_info(_, State) ->
-    io:format("Got some other TCP stuff~n"),
     {noreply, State}.
 
 code_change(_, State, _) ->
@@ -38,13 +36,11 @@ terminate(_, _) ->
     ok.
 
 respond(Socket) ->
-    io:format("Responding.~n"),
     Response = http_200_ok_response(),
     gen_tcp:send(Socket, Response),
     gen_tcp:close(Socket).
 
 start_request_listener() ->
-    io:format("Request listener started in query server~n"),
     Port = 8000,
     {ok, LSock} = gen_tcp:listen(Port, []),
     Parent = self(),
