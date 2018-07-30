@@ -28,11 +28,12 @@ start_link() ->
 
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
-    Children = [{location_server, {location_server, start_link, []},
-		 permanent, 2000, worker, [location_server]}],
-    {ok, {{one_for_all, 0, 1},
-	  Children}
-    }.
+    QS = {query_server, {query_server, start_link, []},
+	  permanent, 2000, worker, [query_server]},
+    LS = {location_server, {location_server, start_link, []},
+	  permanent, 2000, worker, [location_server]},
+    Children = [QS, LS],
+    {ok, {{one_for_all, 0, 1}, Children}}.
 
 %%====================================================================
 %% Internal functions

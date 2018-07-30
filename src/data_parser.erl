@@ -17,6 +17,7 @@ pretty_location(Location_data) ->
     Country = maps:get(<<"country">>, Addr),
     City = maps:get(<<"city">>, Addr),
     Separator = <<", ">>,
-    <<City/binary, Separator/binary, Country/binary>>.
+    Newline = <<"\r\n">>,
+    <<City/binary, Separator/binary, Country/binary, Newline/binary>>.
     
     

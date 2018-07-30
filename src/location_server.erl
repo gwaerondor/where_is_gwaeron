@@ -39,7 +39,7 @@ code_change(_, State, _) ->
 
 init(_) ->
     start_to_listen_for_location_updates(),
-    {ok, #{location => "unknown",
+    {ok, #{location => <<"unknown">>,
 	   coordinates => #{longitude => 0.0, latitude => 0.0}}
     }.
 
@@ -64,7 +64,6 @@ query_coordinates(Coords) ->
     Lat = five_decimals(maps:get(latitude, Coords)),
     Lon = five_decimals(maps:get(longitude, Coords)),
     Command = string:join(["bash lookup.bash", Lat, Lon], " "),
-    io:format("The command is: ~p~n", [Command]),
     clean_up(os:cmd(Command)).
 
 five_decimals(Float) ->
